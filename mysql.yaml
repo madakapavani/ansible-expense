@@ -1,17 +1,27 @@
 - name: configure mysql server
-  host: mysql
+  hosts: mysql
   become: yes
+  vars:
+    mysql_root_password: ExpenseApp@1
   tasks:
-  - name: Install mysql
-   ansible.builtin.package:
-    name: mysql
-    state: present
+  - name: Install MySQL libraries
+    ansible.builtin.pip:
+      name: "{{ item }}"
+      executable: pip3.9
+    loop:
+    - cryptography
+    - PyMySQL
 
-- name: enable mysql server
-   ansible.builtin.service:
-    name: mysql
-    state: started
-    enabled: yes
+  - name: Install MySQL server
+    ansible.builtin.package:
+      name: mysql-server
+      state: installed
+
+  - name: start and enable mysql server
+    ansible.builtin.service:
+      name: mysqld
+      state: started
+      enabled: yes
 
   - name: connect to mysql server
     community.mysql.mysql_info:
